@@ -23,6 +23,7 @@ build_addon_zip() {
 	cat $ADDON_NAME/addon.xml|grep -v "<?xml" >> $KODI_VERSION/addons.xml
 
 	zip -qr $OUTPUT_ZIP_FILE $ADDON_NAME/
+	cp $OUTPUT_ZIP_FILE $KODI_VERSION/$ADDON_NAME-latest.zip
 }
 
 convert_from_matrix_to_leia() {
