@@ -19,12 +19,14 @@ except ImportError:
 
 import xbmcaddon, xbmcgui, xbmcplugin
 
+ADDON_ID = "plugin.homodaba.movies"
+
 # Get the plugin url in plugin:// notation.
 _URL = sys.argv[0]
 # Get the plugin handle as an integer number.
 _HANDLE = int(sys.argv[1])
 
-addon = xbmcaddon.Addon(id="plugin.homodaba.movies")
+addon = xbmcaddon.Addon(id=ADDON_ID)
 HDB_URL_BASE = addon.getSetting('homodaba_url')
 
 def get_hdb_json(url, no_data_default={}):
@@ -37,6 +39,9 @@ def get_hdb_json(url, no_data_default={}):
 
     if response.ok:
         return response.json()
+    else:
+        print("[%s] Error '%s' al obtener datos de '%s'." % (ADDON_ID, response.status_code, url))
+        print(response.text)
 
     return no_data_default
 
@@ -196,6 +201,7 @@ def router(paramstring):
             # Play a video from a provided URL.
             play_video(params['video'])
         else:
+            print("[%s] Parametro invalido '%s'." % (ADDON_ID, paramstring))
             # If the provided paramstring does not contain a supported action
             # we raise an exception. This helps to catch coding errors,
             # e.g. typos in action names.

@@ -11,10 +11,13 @@ Este proyecto sirve de repo de kodi para los addons para kodi de [homodaba](http
 He creado un shell script [build.sh](build.sh) que genera los distintos zips y metadatos para las distintas versiones de kodi
 
 ## Instalacion del repo en kodi
+OJO: Hay que activar la opcion de permitir addons de terceros para poder instalar estos addons.
  * Descargar el zip del repo para tu version de kodi:
     - [leia](https://raw.githubusercontent.com/moz667/homodaba-kodi-repo/main/leia/repository.homodaba-latest.zip)
     - [matrix](https://raw.githubusercontent.com/moz667/homodaba-kodi-repo/main/matrix/repository.homodaba-latest.zip)
  * [Instalar a traves de la gui de kodi](https://kodi.wiki/view/Add-on_manager#How_to_install_from_a_ZIP_file)
+
+Una vez hecho esto ya podrias instalar los addons a traves de la gui de kodi
 
 ## Listado de addons:
  * [repository.homodaba](src/repository.homodaba), es el addon de repositorio de kodi para los addons de homodaba
