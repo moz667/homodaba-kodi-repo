@@ -2,6 +2,7 @@
 
 ## plugin.homodaba.movies
  * [ ] Completar datos de las pelis (ahora solo saca titulo y thumb)
+ * [ ] Pensar que hacemos con archivos con varios audios y varios subs (molaria que por defecto cogiera el definido por config :P)
  * [ ] He intentado hacer el addon lo mas compatible posible con leia y matrix, actualmente solo tiene una linea en addon.xml que lo hace incompatible (en addon.xml): 
     - Para matrix esta puesto como...
         ```xml
