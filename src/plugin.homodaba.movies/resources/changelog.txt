@@ -1,0 +1,11 @@
+[B]1.0.2[/B]
+  - Refactorizacion, sacando funcionalidades de la api de HDB
+  - Limpiando y ordenando codigo
+  - Busqueda por texto libre
+  - Listado de ultimas pelis añadidas
+
+[B]1.0.1[/B]
+  - Prueba de cambio de version para repo
+
+[B]1.0.0[/B]
+  - init, ejemplo con navegacion por cats

@@ -5,8 +5,6 @@ Infinitas gracias a romanvm ya que en este ejemplo es en el que me he basado:
 https://github.com/romanvm/plugin.video.example
 """
 
-import json
-import requests
 import sys
 
 # Python3:
@@ -14,10 +12,12 @@ try:
     from urllib.parse import urlencode, parse_qsl
 # Python2:
 except ImportError:
-    from urllib import urlencode
     from urlparse import parse_qsl
+    from urllib import urlencode
 
-import xbmcaddon, xbmcgui, xbmcplugin
+import xbmc, xbmcaddon, xbmcgui, xbmcplugin
+
+from resources.lib.homodaba import HDBApi
 
 ADDON_ID = "plugin.homodaba.movies"
 
@@ -27,23 +27,18 @@ _URL = sys.argv[0]
 _HANDLE = int(sys.argv[1])
 
 addon = xbmcaddon.Addon(id=ADDON_ID)
-HDB_URL_BASE = addon.getSetting('homodaba_url')
 
-def get_hdb_json(url, no_data_default={}):
-    response = requests.get(url, headers={
-        'Authorization': 'Basic %s:%s' % (
-            addon.getSetting('homodaba_username'),
-            addon.getSetting('homodaba_api_key')
-        )
-    })
+HDB_API = HDBApi(
+    url_base=addon.getSetting('homodaba_url'),
+    username=addon.getSetting('homodaba_username'),
+    api_key=addon.getSetting('homodaba_api_key'),
+    share_protocol=addon.getSetting('homodaba_share_protocol')
+)
 
-    if response.ok:
-        return response.json()
-    else:
-        print("[%s] Error '%s' al obtener datos de '%s'." % (ADDON_ID, response.status_code, url))
-        print(response.text)
+SEARCH_CAT = "* 0 - BUSCAR *"
+LAST_MOVIES_CAT = "* 1 - NUEVAS *"
 
-    return no_data_default
+MANUAL_CATS = [SEARCH_CAT, LAST_MOVIES_CAT]
 
 def get_url(**kwargs):
     """
@@ -55,73 +50,41 @@ def get_url(**kwargs):
     """
     return '{}?{}'.format(_URL, urlencode(kwargs))
 
-
-def get_categories():
-    data = get_hdb_json("%s/kodi/json/tags" % HDB_URL_BASE, {"tags": []})
-
-    return data["tags"]
-
-def get_videos(category):
-    query_get_vars = {
-        'tag': category, 
-        'protocol': addon.getSetting('homodaba_share_protocol'),
-    }
-
-    url = "%s/kodi/json/movie/search?%s" % (
-        HDB_URL_BASE, 
-        urlencode(query_get_vars)
-    )
-
-    data = get_hdb_json(url, {"results": []})
-
-    return data["results"]
-
-
 def list_categories():
     """
     Create the list of video categories in the Kodi interface.
     """
-    # Set plugin category. It is displayed in some skins as the name
-    # of the current section.
-    xbmcplugin.setPluginCategory(_HANDLE, 'My Video Collection')
-    # Set plugin content. It allows Kodi to select appropriate views
-    # for this type of content.
+    xbmcplugin.setPluginCategory(_HANDLE, 'Lista de categorias de HDB')
     xbmcplugin.setContent(_HANDLE, 'videos')
+
     # Get video categories
-    categories = get_categories()
+    categories = HDB_API.get_categories()
+
+    # Agregamos las categorias manuales
+    categories = MANUAL_CATS + categories
+
     # Iterate through categories
     for category in categories:
-        # Create a list item with a text label and a thumbnail image.
         list_item = xbmcgui.ListItem(label=category)
-        """
-        # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
-        # Here we use the same image for all items for simplicity's sake.
-        # In a real-life plugin you need to set each image accordingly.
-        list_item.setArt({'thumb': VIDEOS[category][0]['thumb'],
-                          'icon': VIDEOS[category][0]['thumb'],
-                          'fanart': VIDEOS[category][0]['thumb']})
-        """
-        # Set additional info for the list item.
-        # Here we use a category name for both properties for for simplicity's sake.
-        # setInfo allows to set various information for an item.
-        # For available properties see the following link:
-        # https://codedocs.xyz/xbmc/xbmc/group__python__xbmcgui__listitem.html#ga0b71166869bda87ad744942888fb5f14
-        # 'mediatype' is needed for a skin to display info for this ListItem correctly.
-        list_item.setInfo('video', {'title': category,
-                                    'genre': category,
-                                    'mediatype': 'video'})
-        # Create a URL for a plugin recursive call.
-        # Example: plugin://plugin.video.example/?action=listing&category=Animals
+        list_item.setInfo('video', {
+            'title': category,
+            'genre': category,
+            'mediatype': 'video'
+        })
         url = get_url(action='listing', category=category)
-        # is_folder = True means that this item opens a sub-list of lower level items.
         is_folder = True
-        # Add our item to the Kodi virtual folder listing.
         xbmcplugin.addDirectoryItem(_HANDLE, url, list_item, is_folder)
-    # Add a sort method for the virtual folder items (alphabetically, ignore articles)
+    
     xbmcplugin.addSortMethod(_HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
-    # Finish creating a virtual folder.
     xbmcplugin.endOfDirectory(_HANDLE)
 
+def get_user_input():  
+    kb = xbmc.Keyboard('', 'Introduce los terminos a buscar')
+    kb.doModal() # Onscreen keyboard appears
+    if not kb.isConfirmed():
+        return
+    query = kb.getText() # User input
+    return query
 
 def list_videos(category):
     """
@@ -130,42 +93,75 @@ def list_videos(category):
     :param category: Category name
     :type category: str
     """
-    # Set plugin category. It is displayed in some skins as the name
-    # of the current section.
-    xbmcplugin.setPluginCategory(_HANDLE, category)
-    # Set plugin content. It allows Kodi to select appropriate views
-    # for this type of content.
-    xbmcplugin.setContent(_HANDLE, 'videos')
-    # Get the list of videos in the category.
-    videos = get_videos(category)
+    videos = []
+
+    if category == SEARCH_CAT:
+        query = get_user_input() # User input via onscreen keyboard
+        if query:
+            videos = HDB_API.search_videos(query=query)
+            
+    elif category == LAST_MOVIES_CAT:
+        videos = HDB_API.last_movies()
+    else:
+        # Get the list of videos in the category.
+        videos = HDB_API.search_videos(tag=category)
+    
+    if len(videos) > 0:
+        xbmcplugin.setPluginCategory(_HANDLE, category)
+        xbmcplugin.setContent(_HANDLE, 'videos')
+        populate_list(videos)
+        # Add a sort method for the virtual folder items (alphabetically, ignore articles)
+        xbmcplugin.addSortMethod(_HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
+        # Finish creating a virtual folder.
+        xbmcplugin.endOfDirectory(_HANDLE)
+
+
+def populate_list(videos):
     # Iterate through videos.
     for video in videos:
-        # Create a list item with a text label and a thumbnail image.
         list_item = xbmcgui.ListItem(label=video['title'])
         # Set additional info for the list item.
         # 'mediatype' is needed for skin to display info for this ListItem correctly.
-        list_item.setInfo('video', {'title': video['title'],
-                                    # 'genre': video['genre'],
-                                    'mediatype': 'video'})
+        list_item.setInfo('video', {
+            "genre": video['genre'],
+            "country": video['country'],
+            "year": video['year'],
+            "rating": video['rating'],
+            "cast": video['cast'],
+            "director": video['director'],
+            "mpaa": video['mpaa'],
+            "plot": video['plot'],
+            "title": video['title'],
+            "originaltitle": video['originaltitle'],
+            "writer": video['writer'],
+            "tag": video['tag'],
+            "imdbnumber": video['imdbnumber'],
+            'mediatype': 'video'
+        })
+
         # Set graphics (thumbnail, fanart, banner, poster, landscape etc.) for the list item.
         # Here we use the same image for all items for simplicity's sake.
         # In a real-life plugin you need to set each image accordingly.
-        list_item.setArt({'thumb': video['thumb'], 'icon': video['thumb'], 'fanart': video['thumb']})
+        list_item.setArt({
+            'thumb': video['thumb'], 
+            'icon': video['thumb'], 
+            'poster': video['poster'], 
+        })
+
         # Set 'IsPlayable' property to 'true'.
         # This is mandatory for playable items!
         list_item.setProperty('IsPlayable', 'true')
+        
         # Create a URL for a plugin recursive call.
         # Example: plugin://plugin.video.example/?action=play&video=http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
         url = get_url(action='play', video=video['file'])
+
         # Add the list item to a virtual Kodi folder.
         # is_folder = False means that this item won't open any sub-list.
         is_folder = False
+        
         # Add our item to the Kodi virtual folder listing.
         xbmcplugin.addDirectoryItem(_HANDLE, url, list_item, is_folder)
-    # Add a sort method for the virtual folder items (alphabetically, ignore articles)
-    xbmcplugin.addSortMethod(_HANDLE, xbmcplugin.SORT_METHOD_LABEL_IGNORE_THE)
-    # Finish creating a virtual folder.
-    xbmcplugin.endOfDirectory(_HANDLE)
 
 
 def play_video(path):

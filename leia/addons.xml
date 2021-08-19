@@ -20,7 +20,7 @@
 		<platform>all</platform>
 	</extension>
 </addon>
-<addon id="plugin.homodaba.movies" name="Homodaba Movies" version="1.0.1" provider-name="moz667">
+<addon id="plugin.homodaba.movies" name="Homodaba Movies" version="1.0.2" provider-name="moz667">
   <requires>
     <import addon="xbmc.python" version="2.25.0" />
     <import addon="script.module.requests" version="2.22.0" />
@@ -39,7 +39,8 @@
     <website></website>
     <email>moz667@gmail.com</email>
     <source>http://github.com/moz667/homodaba</source>
-    <news>v1.0.0 (2021/08/11)
+    <news>
+      v1.0.0 (2021/08/11)
       [new] init
     </news>
     <assets>
