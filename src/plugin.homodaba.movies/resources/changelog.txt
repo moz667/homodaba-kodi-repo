@@ -1,3 +1,6 @@
+[B]1.0.3[/B]
+  - Fallo en la importacion para leia
+
 [B]1.0.2[/B]
   - Refactorizacion, sacando funcionalidades de la api de HDB
   - Limpiando y ordenando codigo
