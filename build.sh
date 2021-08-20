@@ -52,6 +52,7 @@ convert_from_matrix_to_leia() {
 	sed -i 's/addon="xbmc.python" version="3.0.0"/addon="xbmc.python" version="2.25.0"/g' $ADDON_NAME/addon.xml
 }
 
+# WORKDIR = build/
 mkdir -p build
 
 for addon_dir in repository.homodaba plugin.homodaba.movies
@@ -81,3 +82,16 @@ for addon_dir in repository.homodaba plugin.homodaba.movies
 do
 	rm -rf $addon_dir
 done
+
+# VOLVEMOS AL RAIZ
+cd ..
+
+echo "Para no cambiar zips del repo innecesariamente, casi seguro que vas a querer hacer esto:"
+echo ""
+echo "git restore leia/repository.homodaba-latest.zip"
+echo "git restore leia/repository.homodaba/repository.homodaba-1.0.0.zip"
+echo "git restore matrix/repository.homodaba-latest.zip"
+echo "git restore matrix/repository.homodaba/repository.homodaba-1.0.0.zip"
+echo ""
+echo "Los cambios que hay actualmente en el repo son:"
+git status
