@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.homodaba.movies" name="Homodaba Movies" version="1.0.3" provider-name="moz667">
+<addon id="plugin.homodaba.movies" name="Homodaba Movies" version="1.0.4" provider-name="moz667">
   <requires>
     <import addon="xbmc.python" version="2.25.0" />
     <import addon="script.module.requests" version="2.22.0" />
@@ -18,10 +18,24 @@
     <website></website>
     <email>moz667@gmail.com</email>
     <source>http://github.com/moz667/homodaba</source>
-    <news>
-      v1.0.0 (2021/08/11)
-      [new] init
-    </news>
+    <news>v1.0.4 (2021-08-20)
+  - Moviendo el obsoleto resources/changelog.txt a resources/changelog.md
+
+v1.0.3 (2021-08-19)
+  - Fallo en la importacion para leia
+
+v1.0.2 (2021-08-19)
+  - Refactorizacion, sacando funcionalidades de la api de HDB
+  - Limpiando y ordenando codigo
+  - Busqueda por texto libre
+  - Listado de ultimas pelis añadidas
+
+v1.0.1 (2021-08-16)
+  - Prueba de cambio de version para repo
+
+v1.0.0 (2021-08-11)
+  - init, ejemplo con navegacion por cats
+</news>
     <assets>
         <icon>resources/icon.png</icon>
     </assets>

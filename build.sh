@@ -20,7 +20,26 @@ build_addon_zip() {
 
 	cp $ADDON_NAME/addon.xml $KODI_VERSION/$ADDON_NAME
 
-	cat $ADDON_NAME/addon.xml|grep -v "<?xml" >> $KODI_VERSION/addons.xml
+	# Changelog no deberia ir ni en changelog.md ni en changelog.txt
+	# Si lo pongo en md es para que se visualice chuli con un interprete
+	# de md... :P
+	CHANGELOG_FILE="$ADDON_NAME/resources/changelog.md"
+
+	if [ -f $ADDON_NAME/resources/changelog.txt ]; then
+		CHANGELOG_FILE="$ADDON_NAME/resources/changelog.txt"
+	fi
+
+	if [ -f $CHANGELOG_FILE ]; then
+		# <news></news> solo admite 1500 caracteres, ponemos 1400 para curarnos 
+		# en salud :P
+		NEWS_DESCRIPTION=`head -c 1400 $CHANGELOG_FILE`
+		ESCAPED_NEWS_DESCRIPTION=$(printf '%s\n' "$NEWS_DESCRIPTION" | sed -e 's/[\/&]/\\&/g' |tr $'\n' "~")
+		sed -i "s/news></news>$ESCAPED_NEWS_DESCRIPTION</g" $KODI_VERSION/$ADDON_NAME/addon.xml
+		cat $KODI_VERSION/$ADDON_NAME/addon.xml|tr "~" $'\n' > $KODI_VERSION/$ADDON_NAME/addon.xml.tmp
+		mv $KODI_VERSION/$ADDON_NAME/addon.xml.tmp $KODI_VERSION/$ADDON_NAME/addon.xml
+	fi
+
+	cat $KODI_VERSION/$ADDON_NAME/addon.xml|grep -v "<?xml" >> $KODI_VERSION/addons.xml
 
 	zip -qr $OUTPUT_ZIP_FILE $ADDON_NAME/
 	cp $OUTPUT_ZIP_FILE $KODI_VERSION/$ADDON_NAME-latest.zip
@@ -55,7 +74,7 @@ do
 	echo "</addons>" >> $kodi_version/addons.xml
 	md5sum $kodi_version/addons.xml | sed -e "s/ .*//g"> $kodi_version/addons.xml.md5
 
-	rsync -qa --del $kodi_version/ ../$kodi_version/
+	rsync -qa --del --ignore-times $kodi_version/ ../$kodi_version/
 done
 
 for addon_dir in repository.homodaba plugin.homodaba.movies
