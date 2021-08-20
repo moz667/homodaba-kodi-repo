@@ -83,3 +83,11 @@ La forma mas facil que he visto es basicamente (asumimos que lo vas a probar en 
         ```xml
         <import addon="xbmc.python" version="2.25.0" />
         ```
+
+* Para poder importar archivos desde addon.py, tendremos que poner __init__.py en cada carpera hasta donde se encuentre el archivo a importar. Por ejemplo, si queremos tener una carpeta libs, dentro de resources, tendremos que crear:
+    ```
+    resources/__init__.py
+    resources/lib/__init__.py
+    ```
+
+    Presumiblemente esto debe ocurrir en python2, aunque no he mirado el motivo.
