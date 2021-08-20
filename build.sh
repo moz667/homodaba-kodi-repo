@@ -74,7 +74,7 @@ do
 	echo "</addons>" >> $kodi_version/addons.xml
 	md5sum $kodi_version/addons.xml | sed -e "s/ .*//g"> $kodi_version/addons.xml.md5
 
-	rsync -qa --del --ignore-times $kodi_version/ ../$kodi_version/
+	rsync -va $kodi_version/ ../$kodi_version/
 done
 
 for addon_dir in repository.homodaba plugin.homodaba.movies
